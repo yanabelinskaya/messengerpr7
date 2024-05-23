@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace WpfAppprac7
 {
     public partial class Serverchik : Window
     {
         private List<Socket> users = new List<Socket>();
+        private Dictionary<Socket, string> userNames = new Dictionary<Socket, string>();
         private Socket socket;
-        private string userName;
+        private string serverName;
 
-        public Serverchik(string userName)
+        public Serverchik(string serverName)
         {
             InitializeComponent();
-            this.userName = userName;
+            this.serverName = serverName;
 
             IPEndPoint ipPoint = new IPEndPoint(IPAddress.Any, 3000);
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -34,6 +33,8 @@ namespace WpfAppprac7
             {
                 var client = await socket.AcceptAsync();
                 users.Add(client);
+                userNames[client] = serverName;
+                UpdateUserList();
                 ReceiveMessages(client);
             }
         }
@@ -42,34 +43,50 @@ namespace WpfAppprac7
         {
             while (true)
             {
-                byte[] b = new byte[1024];
-                int byteCount = await client.ReceiveAsync(b, SocketFlags.None);
+                byte[] buffer = new byte[1024];
+                int byteCount = await client.ReceiveAsync(buffer, SocketFlags.None);
                 if (byteCount == 0)
                 {
+                    if (userNames.TryGetValue(client, out string userName))
+                    {
+                        string disconnectMessage = $"{userName} отключился.";
+                        Dispatcher.Invoke(() => ListNameS.Items.Add(disconnectMessage));
+                        LogChat(disconnectMessage);
+                        userNames.Remove(client);
+                        UpdateUserList();
+                    }
                     users.Remove(client);
-                    Dispatcher.Invoke(() => ListNameS.Items.Add($"{client.RemoteEndPoint} отключился."));
-                    LogChat($"{client.RemoteEndPoint} отключился.");
                     client.Close();
                     break;
                 }
 
-                string message = Encoding.UTF8.GetString(b, 0, byteCount);
+                string message = Encoding.UTF8.GetString(buffer, 0, byteCount);
 
                 if (message.Trim() == "/disconnect")
                 {
-                    users.Remove(client);
-                    Dispatcher.Invoke(() => ListNameS.Items.Add($"{client.RemoteEndPoint} отключился по команде."));
-                    LogChat($"{client.RemoteEndPoint} отключился по команде.");
-                    client.Close();
+                    foreach (var user in users)
+                    {
+                        if (user != client)
+                        {
+                            SendMessages(user, "/disconnect");
+                            user.Close();
+                        }
+                    }
+                    Dispatcher.Invoke(() => ListNameS.Items.Add("Мессенджер завершен по команде от сервера."));
+                    socket.Close();
+                    BackToMain();
                     break;
                 }
 
-                Dispatcher.Invoke(() => ListNameS.Items.Add($"[Сообщение от {client.RemoteEndPoint}]: {message}"));
-                LogChat($"[Сообщение от {client.RemoteEndPoint}]: {message}");
+                Dispatcher.Invoke(() => ListNameS.Items.Add(message));
+                LogChat(message);
 
                 foreach (var user in users)
                 {
-                    SendMessages(user, message);
+                    if (user != client)
+                    {
+                        SendMessages(user, message);
+                    }
                 }
             }
         }
@@ -95,6 +112,23 @@ namespace WpfAppprac7
             }
         }
 
+        private void BackToMain()
+        {
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
+        }
+
+        private void UpdateUserList()
+        {
+            List<string> userNamesList = new List<string>();
+            foreach (var entry in userNames)
+            {
+                userNamesList.Add(entry.Value);
+            }
+            Users.ItemsSource = userNamesList;
+        }
+
         private void SendS_Click(object sender, RoutedEventArgs e)
         {
             string message = TextBoxNameS.Text.Trim();
@@ -104,19 +138,16 @@ namespace WpfAppprac7
                 return;
             }
 
-            string fullMessage = $"[{DateTime.Now}] [{userName}]: {message}";
-
-            ListNameS.Items.Add(fullMessage);
-            LogChat(fullMessage);
+            ListNameS.Items.Add($"[Сообщение от сервера]: {message}");
+            LogChat($"[Сообщение от сервера]: {message}");
 
             foreach (var user in users)
             {
-                SendMessages(user, fullMessage);
+                SendMessages(user, message);
             }
 
             TextBoxNameS.Clear();
         }
-
 
         private void Logs_Click(object sender, RoutedEventArgs e)
         {

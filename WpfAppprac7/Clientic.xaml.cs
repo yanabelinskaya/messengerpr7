@@ -88,3 +88,4 @@ namespace WpfAppprac7
             this.Close();
         }
     }
+}

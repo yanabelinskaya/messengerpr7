@@ -8,21 +8,22 @@
         Title="Serverchik" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="6*"/>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="6*" />
+            <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="10*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ListBox x:Name="ListNameS" Grid.Column="2" Grid.Row="1" />
-        <Button x:Name="Logs" Content="Посмотреть логи чата" Grid.Column="2" Grid.Row="0" Background="#FF8E96D8" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold" Click="Logs_Click"/>
-        <TextBox x:Name="TextBoxNameS" Grid.Column="2" Grid.Row="2" Background="#FFD0D3E8"/>
-        <Button x:Name="SendS" Grid.Column="3" Grid.Row="2" Content="Отправить" Background="#FF8E96D8" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold" Click="SendS_Click" />
+        <ListBox x:Name="Users" Grid.Row="1" Grid.ColumnSpan="2"/>
+        <ListBox x:Name="ListNameS" Grid.Column="2" Grid.RowSpan="2" />
+        <TextBox x:Name="TextBoxNameS" Grid.Column="2" Grid.Row="2" Background="#FFD0D3E8" />
+        <Button Grid.Column="3" Grid.Row="2" Content="Отправить" Background="#FF8E96D8" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold" Click="SendS_Click" />
         <Button x:Name="BackS" Grid.Column="1" Grid.Row="2" Content="Выйти" Background="#FF8E96D8" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold" Click="BackS_Click"/>
-        <TextBlock Text="Пользователи:" Grid.ColumnSpan="2" Grid.Row="0" Background="#FFDCD47A" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold"/>
+        <Button x:Name="Logs" Grid.Column="2" Grid.Row="0" Content="Логи" Background="#FF8E96D8" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold" Click="Logs_Click"/>
+        <TextBlock Text="Пользователи:" Grid.ColumnSpan="2" Grid.Row="0" Background="#FFD8D28E" FontSize="20" FontFamily="Bahnschrift" FontWeight="Bold" />
     </Grid>
 </Window>
