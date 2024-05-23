@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace WpfAppprac7
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 socket.Connect(ipAddress, 3000);
                 SendMessages($"{userName} подключился к чату.");
+
+                
             }
             catch (Exception ex)
             {
@@ -49,11 +52,16 @@ namespace WpfAppprac7
 
             if (message == "/disconnect")
             {
+                SendMessages($"{userName} отключился от чата.");
                 socket.Close();
+                BackToMain();
                 return;
             }
 
-            SendMessages($"{userName}: {message}");
+            string fullMessage = $"{DateTime.Now} [{userName}]: {message}";
+            SendMessages(fullMessage);
+            Dispatcher.Invoke(() => ListName.Items.Add(fullMessage));
+            TextBoxName.Clear();
         }
 
         private async void GetMessages()
@@ -70,15 +78,24 @@ namespace WpfAppprac7
                 }
 
                 string message = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                Dispatcher.Invoke(() => ListName.Items.Add(message));
+
+                if (message.StartsWith("/updateUsers"))
+                {
+                    string[] users = message.Substring("/updateUsers".Length).Trim().Split(',');
+                    Dispatcher.Invoke(() => Users.ItemsSource = users);
+                }
+                else
+                {
+                    Dispatcher.Invoke(() => ListName.Items.Add(message));
+                }
             }
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             SendMessages($"{userName} отключился от чата.");
-            socket?.Close();
-            BackToMain();
+            socket?.Close(); // Закрываем сокет клиента
+            BackToMain(); // Переходим на главную страницу
         }
 
         private void BackToMain()
