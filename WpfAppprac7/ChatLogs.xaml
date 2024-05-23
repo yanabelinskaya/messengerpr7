@@ -1,0 +1,8 @@
+﻿<Window x:Class="WpfAppprac7.ChatLogs"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Логи чата" Height="450" Width="800">
+    <Grid>
+        <TextBox x:Name="LogTextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+    </Grid>
+</Window>
